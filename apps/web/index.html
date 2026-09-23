@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0057d8">
+  <title>SimpleWay One</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <a class="brand" href="#" aria-label="SimpleWay One home">
+        <span class="brand-mark">SW</span>
+        <span><strong>SimpleWay</strong><small>ONE</small></span>
+      </a>
+      <nav class="app-nav" aria-label="Primary"><span>A1</span><span>Universal Player</span></nav>
+    </header>
+    <main class="workspace">
+      <aside class="learning-rail" aria-label="Learning navigation">
+        <section class="card"><p class="eyebrow">Language</p><div id="language-selector" class="selector-mount" aria-live="polite"></div></section>
+        <section class="card"><p class="eyebrow">Lessons</p><div id="lesson-list" class="lesson-list" aria-live="polite"></div></section>
+      </aside>      <section id="player" class="player-card card" aria-labelledby="player-title">
+        <div class="player-heading"><div><p class="eyebrow">Review Focus</p><h1 id="player-title">Universal Player</h1></div><span class="level-chip">A1</span></div>
+        <div id="progress" class="progress" aria-label="Lesson progress"><div class="progress-meta"><span>Progress</span><span data-progress-label>0 / 10</span></div><div class="progress-track"><span data-progress-bar></span></div></div>
+        <div class="language-content" dir="ltr" data-content-slot>
+          <p class="capability-slot" data-capability>Choose a language to begin.</p>
+          <div class="media-region" data-optional="media" hidden></div>
+          <div class="representation-slot" data-representation>—</div>
+        </div>
+        <div class="unresolved-state" data-state="content-unresolved" hidden><strong>Content unresolved</strong><span>This lesson is structurally available, but its language content has not been approved yet.</span></div>
+        <div id="feedback" class="feedback" aria-live="polite"></div>
+        <div class="player-actions"><button type="button" class="secondary-action" data-action="back">Back</button><button type="button" class="primary-action" data-action="advance">Continue</button></div>
+      </section>
+    </main>
+    <footer class="app-footer"><span>SimpleWay One</span><span>One method. Many languages.</span></footer>
+  </div>
+</body>
+</html>
