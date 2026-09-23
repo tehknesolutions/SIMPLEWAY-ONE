@@ -38,7 +38,7 @@ function renderLanguages() {
     const button = document.createElement("button");
     button.type = "button"; button.className = "lesson-option";
     button.textContent = `${selectedPack.level} · ${lesson.capability.canDo}`;
-    button.disabled = index !== 0;
+    button.disabled = index !== runtime?.currentMicroLessonIndex;
     return button;
   }));
 }

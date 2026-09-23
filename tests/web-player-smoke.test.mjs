@@ -90,3 +90,11 @@ test("compact layout prevents grid and action overflow", async () => {
   assert.match(css, /\.workspace\s*>\s*\*\s*\{[^}]*min-width:\s*0/is);
   assert.match(css, /\.player-actions\s*>\s*\*\s*\{[^}]*min-width:\s*0/is);
 });
+
+test("first vertical pins canonical HNK and unresolved Esperanto without UI language branches", async () => {
+  const catalog = await source(new URL("../packages/language-packs/catalog.mjs", import.meta.url));
+  const app = await source(appPath);
+  assert.match(catalog, /value:\s*["']EN ZAMI HNK KE["']/);
+  assert.match(catalog, /language:\s*["']esperanto["'][\s\S]*?representations:\s*Object\.freeze\(\[\]\)/);
+  assert.doesNotMatch(app, /(?:if|switch)[^\n]*(?:english|hnk|esperanto)/i);
+});
