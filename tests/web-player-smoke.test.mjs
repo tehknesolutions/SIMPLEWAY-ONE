@@ -44,3 +44,32 @@ test("visual system carries SimpleWay light identity and responsive shell", asyn
   assert.match(css, /\.card/);
   assert.match(css, /\.progress-track/);
 });
+
+const appPath = new URL("../apps/web/app.mjs", import.meta.url);
+
+test("browser controller imports only universal pack runtime and view-model APIs", async () => {
+  const app = await source(appPath);
+  assert.match(app, /listLanguagePacks/);
+  assert.match(app, /getLanguagePack/);
+  assert.match(app, /createLessonRuntime/);
+  assert.match(app, /advanceLessonRuntime/);
+  assert.match(app, /recordLessonEvidence/);
+  assert.match(app, /createPlayerViewModel/);
+  assert.doesNotMatch(app, /(?:===|!==)\s*["'](?:english|hnk|esperanto)["']/i);
+});
+
+test("controller owns fresh session lifecycle and recoverable runtime actions", async () => {
+  const app = await source(appPath);
+  assert.match(app, /function\s+selectLanguage\s*\(/);
+  assert.match(app, /createLessonRuntime\s*\(/);
+  assert.match(app, /runtime\s*=\s*null/);
+  assert.match(app, /evidenceSequence\s*=\s*0/);
+  assert.match(app, /const\s+previousRuntime\s*=\s*runtime/);
+  assert.match(app, /runtime\s*=\s*previousRuntime/);
+  assert.match(app, /viewModel\.canAdvance/);
+});
+
+test("HTML boots the universal browser controller", async () => {
+  const html = await source(htmlPath);
+  assert.match(html, /<script[^>]+type=["']module["'][^>]+src=["']\.\/app\.mjs["']/i);
+});
