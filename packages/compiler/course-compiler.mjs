@@ -21,3 +21,16 @@ export function compileCourse(input = {}) {
   const manifest=freeze({schemaVersion:'1',graphId:input.graph.id,levelProfile:{id:input.levelProfile.id,version:input.levelProfile.version},learningPath:{id:input.learningPath.id,version:input.learningPath.version},languagePack:{id:input.languagePack.id,version:input.languagePack.version},versionVector:{...input.versionVector},units,gaps});
   const canonical=canonicalJson(manifest); return freeze({manifest,canonical,hash:sha256(canonical)});
 }
+
+import { evaluateReadiness } from '../curriculum/a1/readiness.mjs';
+
+export function compileGatedA1Unit(cell={},experienceRequirements=[]){
+  const status=cell.linguistic??'UNRESOLVED';
+  if(status!=='READY') return freeze({microCapabilityId:cell.microCapabilityId,status,experiences:[],blocked:[]});
+  const experiences=[]; const blocked=[];
+  for(const requirement of experienceRequirements){
+    const gate=evaluateReadiness(cell,{representations:requirement.representations??[],requiresPedagogy:requirement.requiresPedagogy??true,requiresEvidence:requirement.requiresEvidence??true});
+    if(gate.eligible) experiences.push({...requirement}); else blocked.push({id:requirement.id,reasons:[...gate.reasons]});
+  }
+  return freeze({microCapabilityId:cell.microCapabilityId,status,experiences,blocked});
+}
