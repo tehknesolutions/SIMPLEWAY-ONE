@@ -72,3 +72,13 @@ test("rejects a runtime positioned on a different microlesson", () => {
   const runtime = createLessonRuntime({ id: "r", microLessons: [first, second] });
   assert.throws(() => createPlayerViewModel({ runtime, microLesson: second }), /current microlesson/i);
 });
+
+
+test("passes optional language-pack media metadata through unchanged", () => {
+  const base = lesson("media-fixture", [{ id: "p", value: "Focus", direction: "ltr", role: "primary" }]);
+  const media = Object.freeze({ type: "image", src: "./assets/focus.svg", alt: "Focus visual" });
+  const microLesson = Object.freeze({ ...base, media });
+  const vm = createPlayerViewModel({ runtime: runtimeFor(microLesson), microLesson });
+  assert.equal(vm.media, media);
+  assert.deepEqual(vm.media, { type: "image", src: "./assets/focus.svg", alt: "Focus visual" });
+});

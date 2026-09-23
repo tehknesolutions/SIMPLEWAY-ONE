@@ -9,6 +9,7 @@ const mounts = {
   capability: document.querySelector("[data-capability]"),
   representation: document.querySelector("[data-representation]"),
   unresolved: document.querySelector('[data-state="content-unresolved"]'),
+  media: document.querySelector('[data-optional="media"]'),
   feedback: document.querySelector("#feedback"),
   progressLabel: document.querySelector("[data-progress-label]"),
   progressBar: document.querySelector("[data-progress-bar]"),
@@ -48,6 +49,13 @@ function renderPlayer() {
   const viewModel = createPlayerViewModel({ runtime, microLesson });
   mounts.capability.textContent = viewModel.capability.canDo;
   mounts.content.dir = viewModel.direction;
+  mounts.media.replaceChildren();
+  mounts.media.hidden = !viewModel.media;
+  if (viewModel.media?.type === "image") {
+    const image = document.createElement("img");
+    image.src = viewModel.media.src; image.alt = viewModel.media.alt ?? "";
+    mounts.media.append(image);
+  }
   mounts.representation.textContent = viewModel.primaryRepresentation?.value ?? "—";
   mounts.unresolved.hidden = viewModel.status !== "content-unresolved";
   mounts.content.hidden = viewModel.status === "content-unresolved";

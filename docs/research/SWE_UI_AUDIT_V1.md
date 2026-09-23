@@ -90,3 +90,9 @@ Flutter packages, Firebase/Auth, SharedPreferences, audio/voice packages, and ro
 ## Gate conclusion
 
 The SWE frontend is valuable primarily as a **proven product grammar**, not as code to transplant. The safest ONE path is to translate its canonical visual tokens and strongest interaction patterns into a dependency-light web shell while rebuilding state ownership around `Language Pack → MicroLesson → Universal Learning Cycle → Lesson Runtime → View Model`. This preserves the maturity of SWE without importing English-course coupling.
+
+## Player V1 media adaptation checkpoint
+
+Task 6 introduced the audited **media pattern** but copied **no SWE binary/image asset**. The first vertical does not require a decorative asset, so `apps/web/assets/` remains intentionally empty/nonexistent. This avoids importing unused artwork or creating a license/source ambiguity.
+
+The universal contract accepts optional media metadata (`type`, `src`, `alt`), passes it through the Player View Model, constrains images with `max-width: 100%` / `object-fit: contain`, and collapses the media region when absent. Responsive QA evidence is stored under `docs/research/qa/` for 390×844 and 1440×1000 Playwright/Chrome viewports.

@@ -73,3 +73,20 @@ test("HTML boots the universal browser controller", async () => {
   const html = await source(htmlPath);
   assert.match(html, /<script[^>]+type=["']module["'][^>]+src=["']\.\/app\.mjs["']/i);
 });
+
+test("responsive media surface constrains images and controller collapses absent media", async () => {
+  const css = await source(cssPath);
+  const app = await source(appPath);
+  assert.match(css, /\.media-region\s+img/);
+  assert.match(css, /max-width:\s*100%/i);
+  assert.match(css, /object-fit:\s*contain/i);
+  assert.match(app, /viewModel\.media/);
+  assert.match(app, /mounts\.media/);
+  assert.match(app, /mounts\.media\.hidden\s*=\s*!viewModel\.media/);
+});
+
+test("compact layout prevents grid and action overflow", async () => {
+  const css = await source(cssPath);
+  assert.match(css, /\.workspace\s*>\s*\*\s*\{[^}]*min-width:\s*0/is);
+  assert.match(css, /\.player-actions\s*>\s*\*\s*\{[^}]*min-width:\s*0/is);
+});
