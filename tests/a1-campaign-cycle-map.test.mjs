@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {createCycleMap,validateCycleMap,getParticipations,A1_CAMPAIGN_CYCLES} from '../packages/campaign/a1/cycle-map.mjs';
+const cycles=['CONTACT','REFERENCE','ACTION','CONTEXT','INTERACTION','TRANSFER','AUTONOMY'];
+const input={id:'A1-CYCLE-MAP-TEST',version:'1.0.0',cycles,participations:[{targetId:'t1',cycle:'CONTACT',role:'INTRODUCE'},{targetId:'t1',cycle:'INTERACTION',role:'REINFORCE'}]};
+test('creates immutable exact seven-cycle map with multi-cycle target participation',()=>{const m=createCycleMap(input);assert.equal(validateCycleMap(m),true);assert.deepEqual(m.cycles,cycles);assert.deepEqual(A1_CAMPAIGN_CYCLES,cycles);assert.equal(getParticipations(m,'t1').participations.length,2);assert.ok(Object.isFrozen(m));});
+test('unknown target is explicitly unresolved',()=>{assert.deepEqual(getParticipations(createCycleMap(input),'missing'),{status:'UNRESOLVED',targetId:'missing',participations:[]});});
+test('rejects invalid macro-order, role, cycle and duplicate participation identity',()=>{assert.throws(()=>createCycleMap({...input,cycles:[...cycles].reverse()}),/cycle order/i);assert.throws(()=>createCycleMap({...input,participations:[{targetId:'t1',cycle:'CONTACT',role:'MASTER'}]}),/role/i);assert.throws(()=>createCycleMap({...input,participations:[{targetId:'t1',cycle:'VOID',role:'INTRODUCE'}]}),/cycle/i);assert.throws(()=>createCycleMap({...input,participations:[input.participations[0],input.participations[0]]}),/duplicate/i);});
+test('does not expose automatic allocation helpers',async()=>{const mod=await import('../packages/campaign/a1/cycle-map.mjs');assert.equal('autoAllocate' in mod,false);assert.equal('distributeAcrossCycles' in mod,false);});
