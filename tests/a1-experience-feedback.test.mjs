@@ -1,0 +1,7 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import { createFeedback } from '../packages/experience/a1/feedback.mjs';
+const attempt={type:'ATTEMPT',id:'a1',missionId:'m1',stepId:'challenge',targetMicroCapabilityId:'t1',outcome:{kind:'OBSERVATION',value:'response'}};
+const evidence={type:'EVIDENCE',id:'e1',missionId:'m1',stepId:'challenge',targetMicroCapabilityId:'t1',criterion:'criterion',observation:'response observed',accepted:true};
+test('evidence-supported feedback continues with bounded observation',()=>{const f=createFeedback({attempt,evidence,semanticBoundary:'Do not infer beyond observed intent.'});assert.equal(f.kind,'EVIDENCE_SUPPORTED');assert.equal(f.nextAction,'CONTINUE');assert.deepEqual(f.observations,['response observed']);assert.ok(Object.isFrozen(f));});
+test('insufficient evidence feedback requests retry',()=>{const f=createFeedback({attempt,semanticBoundary:'Stay bounded.'});assert.equal(f.kind,'INSUFFICIENT_EVIDENCE');assert.equal(f.nextAction,'RETRY');assert.deepEqual(f.observations,['response']);});
+test('feedback has no mastery or authority verdicts',()=>{for(const f of [createFeedback({attempt,evidence}),createFeedback({attempt})]){const s=JSON.stringify(f);assert.doesNotMatch(s,/mastered|canonical|validated/i);}});
+test('correction surface is forbidden without supplied validated correction evidence',()=>{assert.throws(()=>createFeedback({attempt,correctionSurface:'invented answer'}),/correction/i);});
