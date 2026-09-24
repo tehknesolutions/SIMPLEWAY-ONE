@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {missionVersionVector} from '../packages/adaptive/a1/version-boundary.mjs';
+test('V1.4 adaptive version never contaminates V1.3 Mission provenance',()=>{assert.deepEqual(missionVersionVector({structural:'1.1',semantic:'1.2',experience:'1.3',adaptive:'1.4'}),{structural:'1.1',semantic:'1.2',experience:'1.3'});});
