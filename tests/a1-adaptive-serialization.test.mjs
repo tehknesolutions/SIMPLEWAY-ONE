@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {serializeAdaptiveSelection,hashAdaptiveSelection} from '../packages/adaptive/a1/adaptive-serialization.mjs';
+const a={status:'CAMPAIGN_COMPLETE',snapshot:{asOf:null,targets:{t1:{progression:'CHECKPOINTED',attemptsSinceEvidence:0,lastEventAt:null}}}};const b={snapshot:{targets:{t1:{lastEventAt:null,attemptsSinceEvidence:0,progression:'CHECKPOINTED'}},asOf:null},status:'CAMPAIGN_COMPLETE'};
+test('canonical serialization ignores property insertion order',()=>{assert.equal(serializeAdaptiveSelection(a),serializeAdaptiveSelection(b));assert.equal(hashAdaptiveSelection(a),hashAdaptiveSelection(b));});
+test('repeated serialization and SHA-256 are byte-identical',()=>{const s=serializeAdaptiveSelection(a);assert.equal(s,serializeAdaptiveSelection(a));assert.match(hashAdaptiveSelection(a),/^[a-f0-9]{64}$/);});
+test('serialization does not mutate input',()=>{const before=JSON.stringify(a);serializeAdaptiveSelection(a);assert.equal(JSON.stringify(a),before);});
+test('rejects malformed selection states',()=>{assert.throws(()=>serializeAdaptiveSelection({status:'MAYBE'}),/status/i);assert.throws(()=>hashAdaptiveSelection(null),/selection/i);});
