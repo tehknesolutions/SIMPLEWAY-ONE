@@ -23,3 +23,29 @@ test('SELECTED exposes HNK mission and authoritative journal',()=>{const s=creat
 test('identical Journal replay yields identical derived session',()=>{assert.deepEqual(createCampaignPlayerSession(input('hnk')),createCampaignPlayerSession(input('hnk')));});
 test('NO_ELIGIBLE_MISSION exposes no mission',()=>{const s=createCampaignPlayerSession(input('esperanto'));assert.equal(s.status,'NO_ELIGIBLE_MISSION');assert.equal(s.mission,null);});
 test('CAMPAIGN_COMPLETE exposes no mission',()=>{const completed={...input('hnk'),journal:createCampaignJournal({campaignId:definition.id,definitionVersion:definition.version,events:[{id:'done',cursor:1,campaignId:definition.id,definitionVersion:definition.version,type:'EVIDENCE',targetId:A1_EXISTING_TARGET,nodeId:'n1',accepted:true,at:'2026-09-25T17:00:00-03:00'}]})};const s=createCampaignPlayerSession(completed);assert.equal(s.status,'CAMPAIGN_COMPLETE');assert.equal(s.mission,null);});
+
+test('apply appends accepted evidence exactly once and replays route',async()=>{
+ const {applyCampaignPlayerEvent}=await import('../packages/app/campaign-player-session.mjs');
+ const before=input('hnk'); const projection=structuredClone(createCampaignPlayerSession(before).projection);
+ const event={id:'e1',cursor:1,campaignId:definition.id,definitionVersion:definition.version,type:'EVIDENCE',targetId:A1_EXISTING_TARGET,nodeId:'n1',accepted:true,at:'2026-09-25T18:01:00-03:00'};
+ const after=applyCampaignPlayerEvent(before,event);
+ assert.equal(after.journal.events.filter(e=>e.id==='e1').length,1); assert.equal(after.status,'CAMPAIGN_COMPLETE');
+ assert.deepEqual(createCampaignPlayerSession(before).projection,projection); assert.equal(before.journal.events.length,0);
+});
+
+test('apply preserves cursor order and rejects version mismatch',async()=>{
+ const {applyCampaignPlayerEvent}=await import('../packages/app/campaign-player-session.mjs');
+ const first={id:'e1',cursor:1,campaignId:definition.id,definitionVersion:definition.version,type:'MISSION_STARTED',targetId:A1_EXISTING_TARGET,nodeId:'n1',at:'2026-09-25T18:01:00-03:00'};
+ const s1=applyCampaignPlayerEvent(input('hnk'),first); assert.deepEqual(s1.journal.events.map(e=>e.cursor),[1]);
+ assert.throws(()=>applyCampaignPlayerEvent({...input('hnk'),journal:s1.journal},{...first,id:'e2',cursor:2,definitionVersion:'wrong'}),/version mismatch/);
+});
+
+test('node-scoped events stay isolated for repeated target participation',async()=>{
+ const {applyCampaignPlayerEvent}=await import('../packages/app/campaign-player-session.mjs');
+ const repeatedMap=createCycleMap({id:'repeat-map',version:'1',cycles,participations:[{targetId:A1_EXISTING_TARGET,cycle:'CONTACT',role:'INTRODUCE'},{targetId:A1_EXISTING_TARGET,cycle:'REFERENCE',role:'REINFORCE'}]});
+ const repeatedDefinition=createCampaignDefinition({id:'repeat-campaign',version:'1.5',cycleMap:repeatedMap,nodes:[{id:'r1',targetId:A1_EXISTING_TARGET,cycle:'CONTACT',role:'INTRODUCE'},{id:'r2',targetId:A1_EXISTING_TARGET,cycle:'REFERENCE',role:'REINFORCE'}],edges:[{from:'r1',to:'r2'}],gates:[]});
+ const repeatedJournal=createCampaignJournal({campaignId:repeatedDefinition.id,definitionVersion:repeatedDefinition.version,events:[]});
+ const base={...input('hnk'),definition:repeatedDefinition,journal:repeatedJournal};
+ const after=applyCampaignPlayerEvent(base,{id:'r-e1',cursor:1,campaignId:repeatedDefinition.id,definitionVersion:repeatedDefinition.version,type:'EVIDENCE',targetId:A1_EXISTING_TARGET,nodeId:'r1',accepted:true,at:'2026-09-25T18:01:00-03:00'});
+ assert.deepEqual(after.projection.nodes.r1.eventIds,['r-e1']); assert.deepEqual(after.projection.nodes.r2.eventIds,[]);
+});

@@ -1,4 +1,5 @@
 import {resumeCampaign} from '../campaign/a1/campaign-runtime.mjs';
+import {appendCampaignEvent} from '../campaign/a1/campaign-journal.mjs';
 
 const freeze=value=>{
   if(!value||typeof value!=='object'||Object.isFrozen(value)) return value;
@@ -15,4 +16,8 @@ export function createCampaignPlayerSession(input={}) {
     why:resumed.why,
     journal:input.journal
   });
+}
+export function applyCampaignPlayerEvent(sessionInput,event) {
+  const journal=appendCampaignEvent(sessionInput.journal,event);
+  return createCampaignPlayerSession({...sessionInput,journal});
 }
