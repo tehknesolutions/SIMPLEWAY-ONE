@@ -82,3 +82,25 @@ test("passes optional language-pack media metadata through unchanged", () => {
   assert.equal(vm.media, media);
   assert.deepEqual(vm.media, { type: "image", src: "./assets/focus.svg", alt: "Focus visual" });
 });
+test("campaign view model renders Mission representation without language branches", async () => {
+  const {createCampaignPlayerViewModel}=await import('../packages/app/player-view-model.mjs');
+  const primary={value:'EN ZAMI HNK KE',script:'Latn',direction:'ltr'};
+  const mission={status:'READY',steps:[{id:'orient',role:'ORIENT',realizations:[{status:'READY',bundle:{primary}}]}]};
+  const session={status:'SELECTED',mission,projection:{nodes:{n1:{state:'AVAILABLE'},n2:{state:'LOCKED'}},journalCursor:0},why:[]};
+  const vm=createCampaignPlayerViewModel({session});
+  assert.equal(vm.primaryRepresentation.value,'EN ZAMI HNK KE'); assert.equal(vm.direction,'ltr'); assert.equal(vm.canAdvance,true);
+});
+
+test("campaign view model clears content for non-selected/unresolved session", async () => {
+  const {createCampaignPlayerViewModel}=await import('../packages/app/player-view-model.mjs');
+  const vm=createCampaignPlayerViewModel({session:{status:'NO_ELIGIBLE_MISSION',mission:null,projection:{nodes:{n1:{state:'AVAILABLE'}},journalCursor:0},why:['UNRESOLVED']}});
+  assert.equal(vm.primaryRepresentation,null); assert.deepEqual(vm.auxiliaryRepresentations,[]); assert.equal(vm.canAdvance,false);
+});
+
+test("campaign direction comes only from Representation and progress from Projection", async () => {
+  const {createCampaignPlayerViewModel}=await import('../packages/app/player-view-model.mjs');
+  const mission={status:'READY',steps:[{id:'orient',role:'ORIENT',realizations:[{status:'READY',bundle:{primary:{value:'مثال',script:'Arab',direction:'rtl'}}}]}]};
+  const projection={nodes:{n1:{state:'EVIDENCED'},n2:{state:'AVAILABLE'},n3:{state:'LOCKED'}},journalCursor:7};
+  const vm=createCampaignPlayerViewModel({session:{status:'SELECTED',mission,projection,why:[]}});
+  assert.equal(vm.direction,'rtl'); assert.deepEqual(vm.progress,{completedSteps:1,totalSteps:3,journalCursor:7});
+});
