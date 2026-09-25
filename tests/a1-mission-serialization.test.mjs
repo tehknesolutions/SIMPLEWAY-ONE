@@ -1,0 +1,6 @@
+import test from 'node:test'; import assert from 'node:assert/strict';
+import { serializeMission,hashMission } from '../packages/experience/a1/mission-serialization.mjs';
+const mission={id:'m1',version:'1',blueprintId:'b',status:'READY',targetMicroCapabilityIds:['x'],steps:[{id:'s',role:'MICRO_LESSON',targetMicroCapabilityIds:['x'],realizations:[]}],gates:[],provenance:{versionVector:{semantic:'1.2',experience:'1.3'}}};
+test('serialization and hash are deterministic',()=>{const a=serializeMission(mission);assert.equal(a,serializeMission(mission));assert.equal(hashMission(mission),hashMission(mission));assert.match(hashMission(mission),/^[a-f0-9]{64}$/);});
+test('equivalent property insertion orders serialize identically',()=>{const reordered={status:'READY',provenance:mission.provenance,gates:[],steps:mission.steps,targetMicroCapabilityIds:['x'],blueprintId:'b',version:'1',id:'m1'};assert.equal(serializeMission(reordered),serializeMission(mission));});
+test('serialization does not mutate mission and rejects incomplete/non-ready objects',()=>{const before=JSON.stringify(mission);serializeMission(mission);assert.equal(JSON.stringify(mission),before);assert.throws(()=>serializeMission({...mission,status:'BLOCKED'}),/READY/i);assert.throws(()=>serializeMission({status:'READY'}),/mission/i);});

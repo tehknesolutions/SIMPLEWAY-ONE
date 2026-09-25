@@ -1,0 +1,1 @@
+export function missionVersionVector(vector={}){const {structural,semantic,experience}=vector;return Object.freeze({structural,semantic,experience});}
