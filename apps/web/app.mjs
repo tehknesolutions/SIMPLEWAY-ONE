@@ -12,7 +12,7 @@ const mounts={
  advance:document.querySelector('[data-action="advance"]')
 };
 let selectedPack=null,sessionInput=null,session=null,evidenceSequence=0;
-const now=()=>new Date().toISOString();
+const now=()=>document.lastModified;
 
 function renderLanguages(){mounts.languages.replaceChildren(...listLanguagePacks().map(pack=>{
  const button=document.createElement('button'); button.type='button'; button.className='language-option';
@@ -21,14 +21,14 @@ function renderLanguages(){mounts.languages.replaceChildren(...listLanguagePacks
 function renderLessons(){
  if(!selectedPack){mounts.lessons.textContent='Choose a language.';return;}
  const button=document.createElement('button'); button.type='button'; button.className='lesson-option';
- button.textContent=`${selectedPack.level} · Campaign`; button.disabled=session?.status!=='SELECTED'; mounts.lessons.replaceChildren(button);
+ button.textContent=`${selectedPack.level} Ã‚Â· Campaign`; button.disabled=session?.status!=='SELECTED'; mounts.lessons.replaceChildren(button);
 }
 function renderPlayer(){
  if(!session)return; const viewModel=createCampaignPlayerViewModel({session});
  mounts.capability.textContent=session.mission?.targetId??'Campaign'; mounts.content.dir=viewModel.direction;
  mounts.media.replaceChildren(); mounts.media.hidden=!viewModel.media;
  if(viewModel.media?.type==='image'){const image=document.createElement('img');image.src=viewModel.media.src;image.alt=viewModel.media.alt??'';mounts.media.append(image);}
- mounts.representation.textContent=viewModel.primaryRepresentation?.value??'—';
+ mounts.representation.textContent=viewModel.primaryRepresentation?.value??'Ã¢â‚¬â€';
  const unresolved=session.status==='NO_ELIGIBLE_MISSION'; mounts.unresolved.hidden=!unresolved; mounts.content.hidden=unresolved;
  mounts.advance.disabled=!viewModel.canAdvance; mounts.progressLabel.textContent=`${viewModel.progress.completedSteps} / ${viewModel.progress.totalSteps}`;
  const denominator=Math.max(viewModel.progress.totalSteps,1); mounts.progressBar.style.width=`${(viewModel.progress.completedSteps/denominator)*100}%`;
@@ -46,9 +46,9 @@ function runCampaignAction(event){
 }
 mounts.advance.addEventListener('click',()=>{
  if(!session)return; const viewModel=createCampaignPlayerViewModel({session}); if(!viewModel.canAdvance)return;
- evidenceSequence+=1; const node=Object.values(session.projection.nodes).find(item=>item.state==='AVAILABLE'); if(!node)return;
+ evidenceSequence+=1; const entry=Object.entries(session.projection.nodes).find(([,item])=>item.state==='AVAILABLE'); if(!entry)return; const [nodeId]=entry;
  runCampaignAction({id:`web-evidence-${evidenceSequence}`,cursor:session.journal.events.length+1,
   campaignId:sessionInput.definition.id,definitionVersion:sessionInput.definition.version,type:'EVIDENCE',
-  targetId:node.targetId,nodeId:node.nodeId,accepted:true,at:now()});
+  targetId:sessionInput.definition.nodes.find(item=>item.id===nodeId).targetId,nodeId,accepted:true,at:now()});
 });
 renderLanguages(); renderLessons();
