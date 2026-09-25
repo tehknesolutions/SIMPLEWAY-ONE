@@ -51,21 +51,23 @@ test("browser controller imports only universal pack runtime and view-model APIs
   const app = await source(appPath);
   assert.match(app, /listLanguagePacks/);
   assert.match(app, /getLanguagePack/);
-  assert.match(app, /createLessonRuntime/);
-  assert.match(app, /advanceLessonRuntime/);
-  assert.match(app, /recordLessonEvidence/);
-  assert.match(app, /createPlayerViewModel/);
+  assert.match(app, /createA1PlayerCampaignInput/);
+  assert.match(app, /createCampaignPlayerSession/);
+  assert.match(app, /applyCampaignPlayerEvent/);
+  assert.match(app, /createCampaignPlayerViewModel/);
+  assert.doesNotMatch(app, /createLessonRuntime|advanceLessonRuntime|recordLessonEvidence/);
   assert.doesNotMatch(app, /(?:===|!==)\s*["'](?:english|hnk|esperanto)["']/i);
 });
 
 test("controller owns fresh session lifecycle and recoverable runtime actions", async () => {
   const app = await source(appPath);
   assert.match(app, /function\s+selectLanguage\s*\(/);
-  assert.match(app, /createLessonRuntime\s*\(/);
-  assert.match(app, /runtime\s*=\s*null/);
+  assert.match(app, /createA1PlayerCampaignInput\s*\(/);
+  assert.match(app, /createCampaignPlayerSession\s*\(/);
+  assert.match(app, /sessionInput\s*=\s*null/);
   assert.match(app, /evidenceSequence\s*=\s*0/);
-  assert.match(app, /const\s+previousRuntime\s*=\s*runtime/);
-  assert.match(app, /runtime\s*=\s*previousRuntime/);
+  assert.match(app, /const\s+previousSession\s*=\s*session/);
+  assert.match(app, /session\s*=\s*previousSession/);
   assert.match(app, /viewModel\.canAdvance/);
 });
 
